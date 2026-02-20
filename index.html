@@ -965,6 +965,8 @@
       };
 
       Object.entries(buttons).forEach(([action, btn]) => {
+        if (!btn) return; // skip if button doesn't exist
+        
         if (action === 'menu') {
           btn.addEventListener('click', () => {
             gameRunning = false;
@@ -973,20 +975,41 @@
           });
           return;
         }
+        
         const keyCode = mobileKeyMap[action];
+        
+        // Touch events
         btn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          keys[keyCode] = true;
+        }, false);
+        
+        btn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          keys[keyCode] = false;
+        }, false);
+        
+        // Mouse events (for testing and desktop)
+        btn.addEventListener('mousedown', (e) => {
           e.preventDefault();
           keys[keyCode] = true;
         });
-        btn.addEventListener('touchend', (e) => {
+        
+        btn.addEventListener('mouseup', (e) => {
           e.preventDefault();
           keys[keyCode] = false;
         });
-        btn.addEventListener('mousedown', () => { keys[keyCode] = true; });
-        btn.addEventListener('mouseup', () => { keys[keyCode] = false; });
+        
+        btn.addEventListener('mouseleave', () => {
+          keys[keyCode] = false; // release key if mouse leaves button
+        });
       });
     }
-    setupMobileControls();
+    
+    // Initialize mobile controls after buttons are in DOM
+    setTimeout(setupMobileControls, 100);
 
     document.getElementById('vsAiBtn').addEventListener('click', () => {
       // show color selection modal for single-player
