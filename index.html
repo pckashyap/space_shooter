@@ -36,10 +36,55 @@
     canvas {
       display: block;
       background: #0f3460;
-      width: 960px;
-      height: 540px;
+      width: 100%;
+      max-width: 960px;
+      height: auto;
+      aspect-ratio: 16 / 9;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
+      touch-action: none;
+    }
+    #gameContainer {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    #mobileControls {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+      padding: 10px;
+    }
+    .mobile-btn {
+      padding: 15px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.5rem;
+      border: 2px solid #e94560;
+      background: rgba(233, 69, 96, 0.2);
+      color: #e94560;
+      cursor: pointer;
+      border-radius: 8px;
+      active-color: #e94560;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .mobile-btn:active {
+      background: rgba(233, 69, 96, 0.5);
+    }
+    @media (max-width: 768px) {
+      #controls { display: none; }
+      #mobileControls { display: grid; }
+      canvas {
+        width: 100vw;
+        height: 56.25vw;
+        max-width: 100vw;
+      }
+      #gameContainer {
+        width: 100vw;
+        max-width: 100vw;
+      }
+      body { overflow: hidden; }
     }
     #controls {
       margin-top: 15px;
@@ -181,6 +226,15 @@
   <div id="controls">
     <span class="player-control">P1: A/D move • W jump • G punch • H kick</span><br>
     <span class="player2-control">P2: ←/→ move • ↑ jump • K punch • L kick</span>
+  </div>
+
+  <div id="mobileControls">
+    <button class="mobile-btn" id="mobileLeft">← LEFT</button>
+    <button class="mobile-btn" id="mobileRight">RIGHT →</button>
+    <button class="mobile-btn" id="mobileJump">↑ JUMP</button>
+    <button class="mobile-btn" id="mobilePunch">PUNCH</button>
+    <button class="mobile-btn" id="mobileKick">KICK</button>
+    <button class="mobile-btn" id="mobileMenu" style="grid-column: 1/-1;">MENU</button>
   </div>
 
   <script>
@@ -897,6 +951,42 @@
       }
     });
     document.addEventListener('keyup', e => { keys[e.code] = false; });
+
+    // Mobile touch controls
+    function setupMobileControls() {
+      const mobileKeyMap = { left: 'KeyA', right: 'KeyD', jump: 'KeyW', punch: 'KeyG', kick: 'KeyH' };
+      const buttons = {
+        left: document.getElementById('mobileLeft'),
+        right: document.getElementById('mobileRight'),
+        jump: document.getElementById('mobileJump'),
+        punch: document.getElementById('mobilePunch'),
+        kick: document.getElementById('mobileKick'),
+        menu: document.getElementById('mobileMenu')
+      };
+
+      Object.entries(buttons).forEach(([action, btn]) => {
+        if (action === 'menu') {
+          btn.addEventListener('click', () => {
+            gameRunning = false;
+            gameOverScreen.style.display = 'none';
+            startScreen.style.display = 'flex';
+          });
+          return;
+        }
+        const keyCode = mobileKeyMap[action];
+        btn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          keys[keyCode] = true;
+        });
+        btn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          keys[keyCode] = false;
+        });
+        btn.addEventListener('mousedown', () => { keys[keyCode] = true; });
+        btn.addEventListener('mouseup', () => { keys[keyCode] = false; });
+      });
+    }
+    setupMobileControls();
 
     document.getElementById('vsAiBtn').addEventListener('click', () => {
       // show color selection modal for single-player
