@@ -760,6 +760,8 @@
       roundTimer = ROUND_TIME;
       roundPaused = false;
       roundEnding = false;
+      // Initialize mobile controls with the correct keyMap
+      initMobileControls();
       startRound();
     }
 
@@ -987,7 +989,8 @@
 
     // Mobile touch controls
     function setupMobileControls() {
-      const mobileKeyMap = { left: 'KeyA', right: 'KeyD', jump: 'KeyW', punch: 'KeyG', kick: 'KeyH' };
+      // Use the actual keyMap.p1 for mobile controls (since mobile is single-player only)
+      const mobileKeyMap = keyMap.p1;
       const buttons = {
         left: document.getElementById('mobileLeft'),
         right: document.getElementById('mobileRight'),
@@ -1010,6 +1013,7 @@
         }
         
         const keyCode = mobileKeyMap[action];
+        if (!keyCode) return; // skip if key mapping doesn't exist
         
         // Touch events
         btn.addEventListener('touchstart', (e) => {
@@ -1041,8 +1045,10 @@
       });
     }
     
-    // Initialize mobile controls after buttons are in DOM
-    setTimeout(setupMobileControls, 100);
+    // Initialize mobile controls after game starts
+    function initMobileControls() {
+      setupMobileControls();
+    }
 
     document.getElementById('vsAiBtn').addEventListener('click', () => {
       // show color selection modal for single-player
